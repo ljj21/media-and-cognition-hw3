@@ -59,8 +59,9 @@ class Hinge(torch.autograd.Function):
         you may need F.relu() to implement the max() function.
         """
         C = C.type_as(W)
+        label = label.unsqueeze(1)
         # TODO: compute the hinge loss (together with L2 norm for SVM): loss = 0.5*||w||^2 + C*\sum_i{max(0, 1 - y_i*output_i)}
-        loss = 0.5 * torch.norm(W, p=2) ** 2 + C * torch.sum(F.relu(1 - label.unsqueeze(1) * output))
+        loss = 0.5 * torch.norm(W, p=2) ** 2 + C * torch.sum(F.relu(1 - label * output))
         ctx.save_for_backward(output, W, label, C)
         return loss
 
@@ -72,7 +73,7 @@ class Hinge(torch.autograd.Function):
         """
         output, W, label, C = ctx.saved_tensors
         # TODO: compute the grad with respect to the output of the linear function and W: dL/doutput, dL/dW
-        grad_output = -grad_loss * torch.mul(label, C) * torch.gt(1 - torch.mul(output, label), 0)
+        grad_output = -C * grad_loss * label * torch.gt(1 - output * label, 0)
         grad_W = grad_loss * W 
         return grad_output, grad_W, None, None
 
