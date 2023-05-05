@@ -31,16 +31,18 @@ if __name__ == '__main__':
 
     train_data, val_data = train_data.reshape(train_data.shape[0], -1).float().numpy(), val_data.reshape(val_data.shape[0], -1).float().numpy()
     train_label, val_label = train_label.numpy(), val_label.numpy()
-    
     # TODO: compute the mean of train_data 
-    data_mean = ???
+    data_mean = np.mean(train_data, axis=0)
     # TODO: compute the covariance matrix of train_data 
-    data_cov = ???
+    data_cov = np.cov(train_data.T)
     # TODO: compute the SVD decompositon of data_cov using np.linalg.svd
-    u, sigma, vh = ???
+    u, sigma, vh = np.linalg.svd(data_cov)
     # TODO: using PCA to compress the dimensionality of the train_data and val_data after subtracting the mean vector
-    train_data = ???
-    val_data = ???
+    train_data = np.matmul(train_data - data_mean, u[:, :opt.feat_dim])
+    val_mean = np.mean(val_data, axis=0)
+    val_cov = np.cov(val_data.T)
+    u, sigma, vh = np.linalg.svd(val_cov)
+    val_data = np.matmul(val_data - val_mean, u[:, :opt.feat_dim])
 
     train_data_0 = train_data[train_label == opt.class_0]
     train_data_1 = train_data[train_label == opt.class_1]
